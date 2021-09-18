@@ -54,6 +54,8 @@ int main()
     int intRead;
     uintptr_t ptr2int = 0x0;
     uintptr_t ptr2ptr2 = 0x0;
+    uintptr_t write2Addr = 0x0;
+
     std::cout << "Enter the ProcID: ";
     std::cin >> procID;
     // Open a handle to a program
@@ -64,7 +66,7 @@ int main()
         system("pause");
         return -1;
     }
-
+    /*
     // Get the value of a ptr to an int
     std::cout << "Enter the Address of ptr2int: ";
     std::cin >> std::hex >> ptr2int;
@@ -83,7 +85,7 @@ int main()
     }
 
     // Get the value of a multilevel ptr to an int
-    std::cout << "Enter address of ptr2ptr2: " << std::endl;
+    std::cout << "Enter address of ptr2ptr2: ";
     std::cin >> std::hex >> ptr2ptr2;
     if (ptr2ptr2 != NULL)
     {
@@ -91,8 +93,20 @@ int main()
         intRead = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
         std::cout << "intRead = " << std::dec << intRead << std::endl;
     }
-
-
+    */
+    // Write to a varInt
+    std::cout << "Enter address to write to: ";
+    std::cin >> std::hex >> write2Addr;
+    int valToWrite = 929292;
+    std::cout << "write2Addr = 0x" << std::hex << write2Addr << std::endl;
+    system("pause");
+    if (WriteProcessMemory(hProc, (LPVOID)write2Addr, &valToWrite, sizeof(int), NULL) == 0)
+    {
+        std::cout << "WriteProcessMemory call Failed\nError Code: " << GetLastError() << std::endl;
+        system("pause");
+        CloseHandle(hProc);
+        return -1;
+    }
     CloseHandle(hProc);
     return 0;
 }
