@@ -19,24 +19,38 @@ You are going to code a console program that will:
 #include <Windows.h>
 int main()
 {
-    int* intRead = 0;
-    int procID = 16896;
-    HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD)procID);
+    int procID;
+    int intRead;
+    uintptr_t ptr2int = 0x0;
+    std::cout << "Enter the ProcID: ";
+    std::cin >> procID;
+    HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, false, (DWORD64)procID);
     if (hProc == NULL)
     {
         std::cout << "OpenProcess Failed\nError Code: " << GetLastError() << std::endl;
         getchar();
         exit(-1);
     }
-    if (ReadProcessMemory(hProc, (LPCVOID*)0xF8FB44, &intRead, sizeof(int*), NULL) == 0)
+
+    std::cout << "Enter the Address of ptr2int: ";
+    std::cin >> std::hex >> ptr2int;
+    std::cout << "ptr2int = 0x" << std::hex << ptr2int << std::endl;
+    getchar();
+    if (ReadProcessMemory(hProc, (LPCVOID*)ptr2int, &ptr2int, sizeof(uintptr_t), NULL) == 0)
     {
-        std::cout << "ReadProcessMemory Failed\nError Code: " << GetLastError() << std::endl;
+        std::cout << "ReadProcessMemory call1 Failed\nError Code: " << GetLastError() << std::endl;
+        getchar();
+        exit(-1);
+    }
+    if (ReadProcessMemory(hProc, (LPCVOID*)ptr2int, &intRead, sizeof(uintptr_t), NULL) == 0)
+    {
+        std::cout << "ReadProcessMemory call2 Failed\nError Code: " << std::dec << GetLastError() << std::endl;
         getchar();
         exit(-1);
     }
     else
     {
-        std::cout << "intRead = " << *intRead << std::endl;
+        std::cout << "intRead = " << std::dec << intRead << std::endl;
         std::cout << "Press ENTER to quit" << std::endl;
         getchar();
     }
