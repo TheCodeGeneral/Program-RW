@@ -19,7 +19,7 @@ You are going to code a console program that will:
 #include <Windows.h>
 #include <vector>
 
-uintptr_t GetVarBaseAddress(HANDLE hProc, uintptr_t addr, std::vector<unsigned int> offsets)
+uintptr_t GetAddrFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned int> offsets)
 {
     uintptr_t newPtr = addr;
 
@@ -36,8 +36,8 @@ uintptr_t GetVarBaseAddress(HANDLE hProc, uintptr_t addr, std::vector<unsigned i
     */
     for (unsigned int i = 0; i < offsets.size(); ++i)
     {
-        bool status = ReadProcessMemory(hProc, (LPCVOID*)newPtr, &newPtr, sizeof(addr), NULL);
-        if (status == 0)
+        bool rpmStatus = ReadProcessMemory(hProc, (LPCVOID*)newPtr, &newPtr, sizeof(addr), NULL);
+        if (rpmStatus == 0)
         {
             std::cout << "ReadProcessMemory call1 Failed\nError Code: " << GetLastError() << std::endl;
             system("pause");
@@ -88,7 +88,7 @@ int main()
     if (ptr2ptr2 != NULL)
     {
         std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
-        intRead = GetVarBaseAddress(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
+        intRead = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
         std::cout << "intRead = " << std::dec << intRead << std::endl;
     }
 
