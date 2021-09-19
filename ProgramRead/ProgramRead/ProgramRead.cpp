@@ -19,7 +19,7 @@ You are going to code a console program that will:
 #include <Windows.h>
 #include <vector>
 
-uintptr_t GetAddrFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned int> offsets)
+uintptr_t GetValueFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned int> offsets)
 {
     uintptr_t newPtr = addr;
 
@@ -42,7 +42,37 @@ uintptr_t GetAddrFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned int
             std::cout << "ReadProcessMemory call1 Failed\nError Code: " << GetLastError() << std::endl;
             system("pause");
             CloseHandle(hProc);
-            return -1;
+            exit(-1);
+        }
+        newPtr += offsets[i];
+    }
+    return newPtr;
+}
+uintptr_t* GetAddrFromBase(HANDLE hProc, uintptr_t* addr, std::vector<unsigned int> offsets)
+{
+    uintptr_t* newPtr = addr;
+
+    /*  Given address of value
+        address = Value = ?
+
+        base ptr -> address + offset4 = address
+
+        base ptr -> address + offset3 = address
+
+        base ptr -> address + offset2 = address
+
+        static base -> address + offset1 = address
+    */
+    for (unsigned int i = 0; i < offsets.size(); ++i)
+    {
+        bool rpmStatus = ReadProcessMemory(hProc, (LPCVOID*)newPtr, &newPtr, sizeof(addr), NULL);
+        if (rpmStatus == 0)
+        {
+            std::cout << "ReadProcessMemory call1 Failed\nError Code: " << GetLastError() << std::endl;
+            system("pause");
+            CloseHandle(hProc);
+            delete newPtr;
+            exit(-1);
         }
         newPtr += offsets[i];
     }
@@ -83,22 +113,23 @@ int main()
 
         std::cout << "intRead = " << std::dec << intRead << std::endl;
     }
-
+    */
     // Get the value of a multilevel ptr to an int
     std::cout << "Enter address of ptr2ptr2: ";
     std::cin >> std::hex >> ptr2ptr2;
+    /*
     if (ptr2ptr2 != NULL)
     {
         std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
-        intRead = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
+        intRead = GetValueFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
         std::cout << "intRead = " << std::dec << intRead << std::endl;
     }
-    */
+    /*
     // Write to a varInt
     std::cout << "Enter address to write to: ";
     std::cin >> std::hex >> write2Addr;
     int valToWrite = 929292;
-    std::cout << "write2Addr = 0x" << std::hex << write2Addr << std::endl;
+    std::cout << "write2Addr = 0x" << std::hex << std::uppercase << write2Addr << std::endl;
     system("pause");
     if (WriteProcessMemory(hProc, (LPVOID)write2Addr, &valToWrite, sizeof(int), NULL) == 0)
     {
@@ -107,6 +138,11 @@ int main()
         CloseHandle(hProc);
         return -1;
     }
+    */
+    // Write to multilevel ptr to an int
+
+    write2Addr = (uintptr_t)GetAddrFromBase(hProc, (uintptr_t*)ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
+    std::cout << "write2Addr = 0x" << std::hex << std::uppercase <<write2Addr << std::endl;
     CloseHandle(hProc);
     return 0;
 }
