@@ -48,10 +48,9 @@ uintptr_t GetValueFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned in
     }
     return newPtr;
 }
-uintptr_t* GetAddrFromBase(HANDLE hProc, uintptr_t* addr, std::vector<unsigned int> offsets)
+uintptr_t GetAddrFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned int> offsets)
 {
-    uintptr_t* newPtr = addr;
-
+    uintptr_t newPtr = addr;
     /*  Given address of value
         address = Value = ?
 
@@ -71,7 +70,6 @@ uintptr_t* GetAddrFromBase(HANDLE hProc, uintptr_t* addr, std::vector<unsigned i
             std::cout << "ReadProcessMemory call1 Failed\nError Code: " << GetLastError() << std::endl;
             system("pause");
             CloseHandle(hProc);
-            delete newPtr;
             exit(-1);
         }
         newPtr += offsets[i];
@@ -117,7 +115,7 @@ int main()
     // Get the value of a multilevel ptr to an int
     std::cout << "Enter address of ptr2ptr2: ";
     std::cin >> std::hex >> ptr2ptr2;
-    /*
+    //*
     if (ptr2ptr2 != NULL)
     {
         std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
@@ -140,9 +138,8 @@ int main()
     }
     */
     // Write to multilevel ptr to an int
-
-    write2Addr = (uintptr_t)GetAddrFromBase(hProc, (uintptr_t*)ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
-    std::cout << "write2Addr = 0x" << std::hex << std::uppercase <<write2Addr << std::endl;
+    /*write2Addr = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
+    std::cout << "write2Addr = 0x" << std::hex << std::uppercase << write2Addr << std::endl;*/
     CloseHandle(hProc);
     return 0;
 }
