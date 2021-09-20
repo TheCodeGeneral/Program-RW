@@ -27,6 +27,7 @@ int main()
     uintptr_t ptr2int = 0x0;
     uintptr_t ptr2ptr2 = 0x0;
     uintptr_t write2Addr = 0x0;
+    uintptr_t readFromAddr = 0x0;
     int valToWrite;
 
     std::cout << "Enter the ProcID: ";
@@ -39,7 +40,7 @@ int main()
         system("pause");
         return -1;
     }
-    /*
+    
     // Get the value of a ptr to an int
     std::cout << "Enter the Address of ptr2int: ";
     std::cin >> std::hex >> ptr2int;
@@ -56,26 +57,14 @@ int main()
 
         std::cout << "intRead = " << std::dec << intRead << std::endl;
     }
-    */
-    // Get the value of a multilevel ptr to an int
-    std::cout << "Enter address of ptr2ptr2: ";
-    std::cin >> std::hex >> ptr2ptr2;
-    //*
-    if (ptr2ptr2 != NULL)
-    {
-        std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
-        intRead = GetValueFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
-        std::cout << "intRead = " << std::dec << intRead << std::endl;
-    }
-    /*
+    
     // Write to a varInt
-    std::cout << "Enter address to write to: ";
+    std::cout << "Enter address of varInt: ";
     std::cin >> std::hex >> write2Addr;
+    std::cout << "write2Addr = 0x" << std::hex << std::uppercase << write2Addr << std::endl;
     std::cout << "Enter value to write: ";
     std::cin >> std::dec >> valToWrite;
 
-    std::cout << "write2Addr = 0x" << std::hex << std::uppercase << write2Addr << std::endl;
-    system("pause");
     if (WriteProcessMemory(hProc, (LPVOID)write2Addr, &valToWrite, sizeof(int), NULL) == 0)
     {
         std::cout << "WriteProcessMemory call Failed\nError Code: " << GetLastError() << std::endl;
@@ -83,7 +72,18 @@ int main()
         CloseHandle(hProc);
         return -1;
     }
-    */
+
+    // Get the value of a multilevel ptr to an int
+    std::cout << "Enter address of ptr2ptr2: ";
+    std::cin >> std::hex >> ptr2ptr2;
+    if (ptr2ptr2 != NULL)
+    {
+        std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
+        readFromAddr = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0});
+        ReadFromAddress(hProc, (LPCVOID)readFromAddr, &intRead, sizeof(int));
+        std::cout << "intRead = " << std::dec << intRead << std::endl;
+    }
+    
     // Write to multilevel ptr to an int
     write2Addr = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0});
     std::cout << "write2Addr = 0x" << std::hex << std::uppercase << write2Addr << std::endl;
