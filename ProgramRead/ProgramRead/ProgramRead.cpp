@@ -18,36 +18,8 @@ You are going to code a console program that will:
 #include <iostream>
 #include <Windows.h>
 #include <vector>
-
-uintptr_t GetAddrFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned int> offsets)
-{
-    uintptr_t newPtr = addr;
-
-    /*  Given address of value
-        address = Value = ?
-
-        base ptr -> address + offset4 = address
-
-        base ptr -> address + offset3 = address
-
-        base ptr -> address + offset2 = address
-
-        static base -> address + offset1 = address
-    */
-    for (unsigned int i = 0; i < offsets.size(); ++i)
-    {
-        bool rpmStatus = ReadProcessMemory(hProc, (LPCVOID*)newPtr, &newPtr, sizeof(addr), NULL);
-        if (rpmStatus == 0)
-        {
-            std::cout << "ReadProcessMemory call1 Failed\nError Code: " << GetLastError() << std::endl;
-            system("pause");
-            CloseHandle(hProc);
-            return -1;
-        }
-        newPtr += offsets[i];
-    }
-    return newPtr;
-}
+#include "Mem.h"
+using namespace Mem;
 int main()
 {
     int procID;
@@ -55,6 +27,8 @@ int main()
     uintptr_t ptr2int = 0x0;
     uintptr_t ptr2ptr2 = 0x0;
     uintptr_t write2Addr = 0x0;
+    uintptr_t readFromAddr = 0x0;
+    int valToWrite;
 
     std::cout << "Enter the ProcID: ";
     std::cin >> procID;
@@ -66,7 +40,7 @@ int main()
         system("pause");
         return -1;
     }
-    /*
+    
     // Get the value of a ptr to an int
     std::cout << "Enter the Address of ptr2int: ";
     std::cin >> std::hex >> ptr2int;
@@ -83,23 +57,14 @@ int main()
 
         std::cout << "intRead = " << std::dec << intRead << std::endl;
     }
-
-    // Get the value of a multilevel ptr to an int
-    std::cout << "Enter address of ptr2ptr2: ";
-    std::cin >> std::hex >> ptr2ptr2;
-    if (ptr2ptr2 != NULL)
-    {
-        std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
-        intRead = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0, 0});
-        std::cout << "intRead = " << std::dec << intRead << std::endl;
-    }
-    */
+    
     // Write to a varInt
-    std::cout << "Enter address to write to: ";
+    std::cout << "Enter address of varInt: ";
     std::cin >> std::hex >> write2Addr;
-    int valToWrite = 929292;
-    std::cout << "write2Addr = 0x" << std::hex << write2Addr << std::endl;
-    system("pause");
+    std::cout << "write2Addr = 0x" << std::hex << std::uppercase << write2Addr << std::endl;
+    std::cout << "Enter value to write: ";
+    std::cin >> std::dec >> valToWrite;
+
     if (WriteProcessMemory(hProc, (LPVOID)write2Addr, &valToWrite, sizeof(int), NULL) == 0)
     {
         std::cout << "WriteProcessMemory call Failed\nError Code: " << GetLastError() << std::endl;
@@ -107,6 +72,25 @@ int main()
         CloseHandle(hProc);
         return -1;
     }
+
+    // Get the value of a multilevel ptr to an int
+    std::cout << "Enter address of ptr2ptr2: ";
+    std::cin >> std::hex >> ptr2ptr2;
+    if (ptr2ptr2 != NULL)
+    {
+        std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
+        readFromAddr = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0});
+        ReadFromAddress(hProc, (LPCVOID)readFromAddr, &intRead, sizeof(int));
+        std::cout << "intRead = " << std::dec << intRead << std::endl;
+    }
+    
+    // Write to multilevel ptr to an int
+    write2Addr = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0});
+    std::cout << "write2Addr = 0x" << std::hex << std::uppercase << write2Addr << std::endl;
+    std::cout << "Enter value to write: ";
+    std::cin >> std::dec >> valToWrite;
+    
+    WriteToAddress(hProc, (LPCVOID)write2Addr, &valToWrite, sizeof(int));
     CloseHandle(hProc);
     return 0;
 }
