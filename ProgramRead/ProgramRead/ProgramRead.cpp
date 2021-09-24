@@ -19,7 +19,7 @@ You are going to code a console program that will:
 #include <Windows.h>
 #include <vector>
 #include "Mem.h"
-using namespace Mem;
+using namespace mem;
 int main()
 {
     int procID;
@@ -80,7 +80,7 @@ int main()
     {
         std::cout << "ptr2ptr2 = 0x" << std::hex << std::uppercase << ptr2ptr2 << std::endl;
         readFromAddr = GetAddrFromBase(hProc, ptr2ptr2, std::vector<unsigned int>{0, 0, 0});
-        ReadFromAddress(hProc, (LPCVOID)readFromAddr, &intRead, sizeof(int));
+        ReadFromAddress(hProc, readFromAddr, &intRead, sizeof(int));
         std::cout << "intRead = " << std::dec << intRead << std::endl;
     }
     
@@ -90,7 +90,7 @@ int main()
     std::cout << "Enter value to write: ";
     std::cin >> std::dec >> valToWrite;
     
-    WriteToAddress(hProc, (LPCVOID)write2Addr, &valToWrite, sizeof(int));
+    WriteToAddress(hProc, write2Addr, &valToWrite, sizeof(int));
     CloseHandle(hProc);
     return 0;
 }

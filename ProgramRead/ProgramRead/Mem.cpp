@@ -48,29 +48,30 @@ namespace mem {
             exit(-1);
         }
     }
-    HANDLE GetProcessByName(std::string name)
+    HANDLE GetProcessByName(std::wstring name)
     {
         DWORD procID = 0;
 
         // Create toolhelp snapshot.
         HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-        PROCESSENTRY32 process;
-        ZeroMemory(&process, sizeof(process));
-        process.dwSize = sizeof(process);
+        PROCESSENTRY32 proc;
+
+        ZeroMemory(&proc, sizeof(proc));
+        proc.dwSize = sizeof(proc);
 
         // Walkthrough all processes.
-        if (Process32First(snapshot, &process))
+        if (Process32First(snapshot, &proc))
         {
             do
             {
                 // Compare process.szExeFile based on format of name, i.e., trim file path
                 // trim .exe if necessary, etc.
-                if (std::string(process.szExeFile) == name)
+                if (proc.szExeFile == name)
                 {
-                    procID = process.th32ProcessID;
+                    procID = proc.th32ProcessID;
                     break;
                 }
-            } while (Process32Next(snapshot, &process));
+            } while (Process32Next(snapshot, &proc));
         }
 
         CloseHandle(snapshot);
@@ -79,24 +80,50 @@ namespace mem {
         {
             return OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
         }
-    void readByte()
-    {
-
+        else
+        {
+            return NULL;
+        }
     }
-    void readInt()
+    void readByte(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
     {
-
+        ReadFromAddress(hProc, addr, lpBuffer, sizeof(byte));
     }
-    void readString(size_t nSize)
+    void readInt(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
     {
-
+        ReadFromAddress(hProc, addr, lpBuffer, sizeof(int));
     }
-    void readFloat()
+    void readString(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer, size_t nSize)
     {
-
+        ReadFromAddress(hProc, addr, lpBuffer, nSize);
     }
-    void readDouble()
+    void readFloat(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
     {
+        ReadFromAddress(hProc, addr, lpBuffer, sizeof(float));
+    }
+    void readDouble(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
+    {
+        ReadFromAddress(hProc, addr, lpBuffer, sizeof(double));
+    }
 
+    void writeByte(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
+    {
+        WriteToAddress(hProc, addr, lpBuffer, sizeof(byte));
+    }
+    void writeInt(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
+    {
+        WriteToAddress(hProc, addr, lpBuffer, sizeof(int));
+    }
+    void writeString(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer, size_t nSize)
+    {
+        WriteToAddress(hProc, addr, lpBuffer, nSize);
+    }
+    void writeFloat(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
+    {
+        WriteToAddress(hProc, addr, lpBuffer, sizeof(float));
+    }
+    void writeDouble(HANDLE hProc, uintptr_t addr, LPVOID lpBuffer)
+    {
+        WriteToAddress(hProc, addr, lpBuffer, sizeof(double));
     }
 }
