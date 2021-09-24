@@ -1,5 +1,5 @@
 #include "Mem.h"
-namespace Mem {
+namespace mem {
    /* uintptr_t GetValueFromBase(HANDLE hProc, uintptr_t addr, std::vector<unsigned int> offsets)
     {
         uintptr_t newPtr = addr;
@@ -20,13 +20,13 @@ namespace Mem {
         */
         for (unsigned int i = 0; i < offsets.size(); ++i)
         {
-            ReadFromAddress(hProc, (LPCVOID)newPtr, &newPtr, sizeof(addr));
+            ReadFromAddress(hProc, newPtr, &newPtr, sizeof(addr));
             newPtr += offsets[i];
         }
         return newPtr;
     }
 
-    void ReadFromAddress(HANDLE hProc, LPCVOID lpBaseAddr, LPVOID lpBuffer, SIZE_T nSize)
+    void ReadFromAddress(HANDLE hProc, uintptr_t lpBaseAddr, LPVOID lpBuffer, SIZE_T nSize)
     {
         bool rpmStatus = ReadProcessMemory(hProc, (LPCVOID*)lpBaseAddr, lpBuffer, nSize, NULL);
         if (rpmStatus == 0)
@@ -37,7 +37,7 @@ namespace Mem {
             exit(-1);
         }
     }
-    void WriteToAddress(HANDLE hProc, LPCVOID lpBaseAddr, LPVOID lpBuffer, SIZE_T nSize)
+    void WriteToAddress(HANDLE hProc, uintptr_t lpBaseAddr, LPVOID lpBuffer, SIZE_T nSize)
     {
         bool rpmStatus = WriteProcessMemory(hProc, (LPCVOID*)lpBaseAddr, lpBuffer, nSize, NULL);
         if (rpmStatus == 0)
@@ -47,5 +47,56 @@ namespace Mem {
             CloseHandle(hProc);
             exit(-1);
         }
+    }
+    HANDLE GetProcessByName(std::string name)
+    {
+        DWORD procID = 0;
+
+        // Create toolhelp snapshot.
+        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        PROCESSENTRY32 process;
+        ZeroMemory(&process, sizeof(process));
+        process.dwSize = sizeof(process);
+
+        // Walkthrough all processes.
+        if (Process32First(snapshot, &process))
+        {
+            do
+            {
+                // Compare process.szExeFile based on format of name, i.e., trim file path
+                // trim .exe if necessary, etc.
+                if (std::string(process.szExeFile) == name)
+                {
+                    procID = process.th32ProcessID;
+                    break;
+                }
+            } while (Process32Next(snapshot, &process));
+        }
+
+        CloseHandle(snapshot);
+
+        if (procID != 0)
+        {
+            return OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
+        }
+    void readByte()
+    {
+
+    }
+    void readInt()
+    {
+
+    }
+    void readString(size_t nSize)
+    {
+
+    }
+    void readFloat()
+    {
+
+    }
+    void readDouble()
+    {
+
     }
 }
